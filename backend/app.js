@@ -31,11 +31,17 @@ app.use(cors({
 
 app.use(express.json());
 
+
+
 dbConnection();
 
 app.use(habitRouter);
 
 const PORT = process.env.PORT || 3001;
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ok: true})
+});
 
 app.use('/auth',authRoutes);
 app.use('/habits',habitRoutes);
