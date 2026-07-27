@@ -1,21 +1,22 @@
 import mongoose from "mongoose";
 
-const habitatSchema = mongoose.Schema({
+const habitatSchema = new mongoose.Schema({
   name: {
-    required: true,
     type: String,
+    required: true,
     trim: true,
   },
   frequency: {
-    required: true,
     type: String,
+    required: true,
   },
   completions: {
-    required: true,
     type: [String],
-  }
+    required: true,
+    default: [],
+  },
+});
 
-})
+const Habit = mongoose.model("Habit", habitatSchema);
 
-const habit =await mongoose.model("Habit", habitatSchema);
-export default habit;
+export default Habit;

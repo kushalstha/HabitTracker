@@ -1,22 +1,20 @@
-import habits from "../../data/habit.js";
-import habit from "../../data/node.js";
-import { ObjectId } from 'mongodb'
-
+import Habit from "../../data/node.js";
 
 export async function getAll() {
-  return habit.find();
-
+  return Habit.find();
 }
 
 export async function addHabit(newHabit) {
-  return habits.push(newHabit);
+  return Habit.create(newHabit);
 }
 
 export async function updateHabit(id, updatedHabit) {
-  const updateId = new ObjectId(id);
-
-  return habit.findByIdAndUpdate(updateId, updatedHabit, {
-    new: true,
+  return Habit.findByIdAndUpdate(id, updatedHabit, {
+    returnDocument: "after",
     runValidators: true,
   });
+}
+
+export async function deleteHabit(id) {
+  return Habit.findByIdAndDelete(id);
 }

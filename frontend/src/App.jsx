@@ -1,80 +1,120 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route, Outlet, useNavigate } from "react-router-dom";
 import { computeStreak } from "./utils/computeStreak";
 import HomePage from "./pages/HomePage";
 import HabitDetailPage from "./pages/HabitDetailPage";
+import AuthPage from "./pages/AuthPage";
 import Title from "./components/Title";
 
-export default function App() {
-  const [showForm, setShowForm] = useState(false);
-  const [habits, setHabits] = useState([
-    {
-      id: 1,
-      name: "Drink Water",
-      frequency: "daily",
-      completions: ["2026-06-27", "2026-06-28", "2026-06-29"],
-    },
-    {
-      id: 2,
-      name: "Workout",
-      frequency: "daily",
-      completions: ["2026-06-27", "2026-06-29"],
-    },
-    {
-      id: 3,
-      name: "Read Book",
-      frequency: "daily",
-      completions: ["2026-06-23","2026-06-24","2026-06-25","2026-06-26","2026-06-27","2026-06-28","2026-06-29"],
-    },
-  ]);
+import {
+  getHabits,
+  addHabit as addHabitAPI,
+  updateHabit as updateHabitAPI,
+  deleteHabit as deleteHabitAPI,
+} from "./api/habitapi.js";
 
-  // 4. Compute streaks on app load
-  useEffect(() => {
-    setHabits((prev) =>
-      prev.map((habit) => ({
+export default function App() {
+  const [habits, setHabits] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [errors, setErrors] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    Boolean(localStorage.getItem("token"))
+  );
+  const [userName, setUserName] = useState(
+    localStorage.getItem("userName") || ""
+  );
+
+  const navigate = useNavigate();
+
+  // Load habits from MongoDB
+  const loadHabits = async () => {
+    try {
+      const response = await getHabits();
+
+      const habitsWithStreak = response.data.map((habit) => ({
         ...habit,
-        streak: computeStreak(habit.completions),
-      }))
-    );
+        completions: habit.completions || [],
+        streak: computeStreak(habit.completions || []),
+      }));
+
+      setHabits(habitsWithStreak);
+    } catch (error) {
+      console.error(error);
+      setErrors([error.message]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadHabits();
   }, []);
 
-  // 2. Toggle today's completion
-  const toggleToday = (id) => {
+  // Tick / Untick
+  const toggleToday = async (id) => {
+    const habit = habits.find((h) => h._id === id);
+
+    if (!habit) return;
+
     const today = new Date().toISOString().split("T")[0];
 
-    setHabits((prev) =>
-      prev.map((habit) => {
-        if (habit.id !== id) return habit;
+    const updatedCompletions = habit.completions.includes(today)
+      ? habit.completions.filter((date) => date !== today)
+      : [...habit.completions, today];
 
-        const alreadyDone = habit.completions.includes(today);
-        const updatedCompletions = alreadyDone
-          ? habit.completions.filter((d) => d !== today)
-          : [...habit.completions, today];
+    try {
+      await updateHabitAPI(id, {
+        name: habit.name,
+        frequency: habit.frequency,
+        completions: updatedCompletions,
+      });
 
-        return {
-          ...habit,
-          completions: updatedCompletions,
-          streak: computeStreak(updatedCompletions),
-        };
-      })
-    );
+      await loadHabits();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  // 5. Add habit
-  const addHabit = (name, frequency) => {
-    const newHabit = {
-      id: Date.now(),
-      name,
-      frequency,
-      completions: [],
-      streak: 0,
-    };
-    setHabits((prev) => [...prev, newHabit]);
+  // Add Habit
+  const handleAddHabit = async (name, frequency) => {
+    try {
+      await addHabitAPI({
+        name,
+        frequency,
+        completions: [],
+      });
+
+      setShowForm(false);
+
+      await loadHabits();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  // 5. Delete habit
-  const deleteHabit = (id) => {
-    setHabits((prev) => prev.filter((h) => h.id !== id));
+  // Delete Habit
+  const handleDeleteHabit = async (id) => {
+    try {
+      await deleteHabitAPI(id);
+
+      await loadHabits();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleAuthSuccess = (name) => {
+    setIsAuthenticated(true);
+    if (name) setUserName(name);
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userName");
+    setIsAuthenticated(false);
+    setUserName("");
+    navigate("/");
   };
 
   const context = {
@@ -82,19 +122,36 @@ export default function App() {
     showForm,
     setShowForm,
     toggleToday,
-    addHabit,
-    deleteHabit,
+    addHabit: handleAddHabit,
+    deleteHabit: handleDeleteHabit,
+    loading,
+    errors,
+    isAuthenticated,
+    logout,
+    userName,
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <>
-      <Title />
+      <Title isAuthenticated={isAuthenticated} logout={logout} />
 
       <div className="min-h-screen bg-gray-100 p-6">
         <Routes>
           <Route element={<Outlet context={context} />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/habit/:id" element={<HabitDetailPage />} />
+            <Route
+              path="/auth"
+              element={<AuthPage onAuthSuccess={handleAuthSuccess} />}
+            />
           </Route>
         </Routes>
       </div>

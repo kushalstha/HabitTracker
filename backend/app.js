@@ -1,25 +1,45 @@
 import express from "express";
-import habits from "./data/habit.js";
-import router from "./src/routes/habitroute.js";
-import dotenv from "dotenv";
 import cors from "cors";
-import dbConnection from "./src/config/db.js";
+import dotenv from "dotenv";
 
-const app = express();
+import dbConnection from "./src/config/db.js";
+import habitRouter from "./src/routes/habitroute.js";
+import authRoutes from "./src/routes/authRoutes.js";
+import habitRoutes from "./src/routes/habitroute.js";
+import cookieParser from "cookie-parser";
+
 dotenv.config();
 
+const app = express();
+
+app.use(cookieParser());
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+}));
 
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+dbConnection();
 
-app.use(router);
+app.use(habitRouter);
 
-app.use(cors());
+const PORT = process.env.PORT || 3001;
 
-await dbConnection();
+app.use('/auth',authRoutes);
+app.use('/habits',habitRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Servers is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
-

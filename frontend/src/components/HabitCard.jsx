@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import Buttons from "./Buttons";
-export default function HabitCard({ habit, onToggle, onDelete }) {
+export default function HabitCard({ habit, onToggle, onDelete, isAuthenticated }) {
   const today = new Date().toISOString().split("T")[0];
   const isCompleted = habit.completions.includes(today);
 
@@ -13,14 +13,13 @@ export default function HabitCard({ habit, onToggle, onDelete }) {
   });
 
   return (
-    <div className="bg-white p-4 rounded shadow">
+    <div className="bg-white border border-black/10 p-4 rounded-3xl shadow-sm">
 
       {/* TOP ROW */}
       <div className="flex justify-between items-center mb-3">
         <div>
           <h2 className="font-semibold text-lg">
-            <Link to={`/habit/${habit.id}`} className="hover:underline">
-              {habit.name}
+            <Link to={`/habit/${habit._id}`} className="hover:underline">              {habit.name}
             </Link>
           </h2>
           <p className="text-sm text-gray-500">
@@ -28,18 +27,20 @@ export default function HabitCard({ habit, onToggle, onDelete }) {
           </p>
         </div>
 
-        <div className="flex gap-2 items-center">
-          <Buttons
-            onClick={() => onToggle(habit.id)}
-            variant={isCompleted ? "primary" : "neutral"}
-          >
-            {isCompleted ? "✓ Done" : "Tick"}
-          </Buttons>
+        {isAuthenticated && (
+          <div className="flex gap-2 items-center">
+            <Buttons
+              onClick={() => onToggle(habit._id)}
+              variant="success"
+            >
+              {isCompleted ? "✓ Done" : "Tick"}
+            </Buttons>
 
-          <Buttons onClick={() => onDelete(habit.id)} variant="danger">
-            Delete
-          </Buttons>
-        </div>
+            <Buttons onClick={() => onDelete(habit._id)} variant="danger">
+              Delete
+            </Buttons>
+          </div>
+        )}
       </div>
 
       {/* CALENDAR STRIP — Sunday to Saturday */}
