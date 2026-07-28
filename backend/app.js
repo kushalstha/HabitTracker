@@ -17,6 +17,7 @@ app.use(cookieParser());
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
+  ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(",").map((url) => url.trim()) : []),
 ];
 
 app.use(cors({
@@ -31,17 +32,11 @@ app.use(cors({
 
 app.use(express.json());
 
-
-
 dbConnection();
 
 app.use(habitRouter);
 
 const PORT = process.env.PORT || 3001;
-
-app.get("/health", (req, res) => {
-  res.status(200).json({ok: true})
-});
 
 app.use('/auth',authRoutes);
 app.use('/habits',habitRoutes);
