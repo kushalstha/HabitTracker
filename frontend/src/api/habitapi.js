@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://habit-tracker958.netlify.app/" || "http://localhost:3001",
+  baseURL: "https://habittracker-8kse.onrender.com" || "http://localhost:3001",
   withCredentials: true,
 });
 
