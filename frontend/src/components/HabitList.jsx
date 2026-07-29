@@ -2,15 +2,29 @@ import HabitCard from "./HabitCard";
 
 export default function HabitList({ habits, onToggle, onDelete, isAuthenticated }) {
   return (
-    <div className="space-y-4 max-w-2xl mx-auto">
+    <div
+      className="mx-auto"
+      style={{
+        display: "grid",
+        gridAutoFlow: "column",
+        gridTemplateRows: "repeat(4, auto)",
+        gap: "1rem",
+        alignItems: "start",
+        justifyContent: "flex-start",
+        maxWidth: "1000px",
+        padding: "0 1rem",
+        marginLeft: "2rem",
+      }}
+    >
       {habits.map((habit) => (
-        <HabitCard
-          key={habit._id}
-          habit={habit}
-          onToggle={onToggle}
-          onDelete={onDelete}
-          isAuthenticated={isAuthenticated}
-        />
+        <div key={habit._id} style={{ width: "320px" }}>
+          <HabitCard
+            habit={habit}
+            onToggle={onToggle}
+            onDelete={onDelete}
+            isAuthenticated={isAuthenticated}
+          />
+        </div>
       ))}
     </div>
   );

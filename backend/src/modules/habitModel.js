@@ -1,20 +1,20 @@
 import Habit from "../../data/node.js";
 
-export async function getAll() {
-  return Habit.find();
+export async function getAll(userId) {
+  return Habit.find({ user: userId });
 }
 
-export async function addHabit(newHabit) {
-  return Habit.create(newHabit);
+export async function addHabit(newHabit, userId) {
+  return Habit.create({ ...newHabit, user: userId });
 }
 
-export async function updateHabit(id, updatedHabit) {
-  return Habit.findByIdAndUpdate(id, updatedHabit, {
+export async function updateHabit(id, updatedHabit, userId) {
+  return Habit.findOneAndUpdate({ _id: id, user: userId }, updatedHabit, {
     returnDocument: "after",
     runValidators: true,
   });
 }
 
-export async function deleteHabit(id) {
-  return Habit.findByIdAndDelete(id);
+export async function deleteHabit(id, userId) {
+  return Habit.findOneAndDelete({ _id: id, user: userId });
 }

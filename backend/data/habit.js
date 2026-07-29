@@ -1,12 +1,14 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 import habit from "./node.js";
+import User from "./user.js";
 import dotenv from "dotenv";
 
 dotenv.config({
   path: './.env',
 });
 
-const habits = [
+const baseHabits = [
   {
     name: "Drink Water",
     frequency: "daily",
@@ -37,8 +39,21 @@ const habits = [
   },
 ];
 
-const connection = mongoose.connect(process.env.MONGODB_URL);
-await habit.deleteMany({})
-await habit.insertMany(habits);
+await mongoose.connect(process.env.MONGODB_URL);
 
-export default habits;
+let demoUser = await User.findOne({ email: "demo@example.com" });
+if (!demoUser) {
+  demoUser = await User.create({
+    name: "Demo User",
+    email: "demo@example.com",
+    password: await bcrypt.hash("demo123456", 10),
+    isAdmin: false,
+  });
+}
+
+await habit.deleteMany({ user: demoUser._id });
+await habit.insertMany(
+  baseHabits.map((habitItem) => ({ ...habitItem, user: demoUser._id }))
+);
+
+export default baseHabits;  

@@ -16,7 +16,7 @@ const getConfig = () => {
 };
 
 export const getHabits = () => {
-  return api.get("/habits");
+  return api.get("/habits", getConfig());
 };
 
 export const addHabit = (habit) => {

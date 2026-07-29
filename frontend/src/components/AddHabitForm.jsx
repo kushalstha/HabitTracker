@@ -34,16 +34,12 @@ export default function AddHabitForm({ onClose, onAdd }) {
             <option value="weekly">Weekly</option>
           </select>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <Buttons type="button" variant="text" onClick={onClose}>
               Cancel
-
             </Buttons>
-            <Buttons type="submit" variant="primary">
-            
-            <button className="bg-green-600 text-white px-3 py-1 rounded">
+            <Buttons type="submit" variant="success">
               Add
-            </button>
             </Buttons>
           </div>
         </form>

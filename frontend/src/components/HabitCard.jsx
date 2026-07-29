@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import Buttons from "./Buttons";
+import { toLocalDateString, parseLocalDateString } from "../utils/date";
 export default function HabitCard({ habit, onToggle, onDelete, isAuthenticated }) {
-  const today = new Date().toISOString().split("T")[0];
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const today = toLocalDateString(new Date());
   const isCompleted = habit.completions.includes(today);
 
   // Last 7 days from Sunday to Saturday
@@ -9,7 +12,7 @@ export default function HabitCard({ habit, onToggle, onDelete, isAuthenticated }
   const last7 = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
-    return d.toISOString().split("T")[0];
+    return toLocalDateString(d);
   });
 
   return (
@@ -32,13 +35,36 @@ export default function HabitCard({ habit, onToggle, onDelete, isAuthenticated }
             <Buttons
               onClick={() => onToggle(habit._id)}
               variant="success"
+              className="w-12 h-12 flex items-center justify-center p-0"
             >
-              {isCompleted ? "✓ Done" : "Tick"}
+              {isCompleted ? "✓" : ""}
             </Buttons>
 
-            <Buttons onClick={() => onDelete(habit._id)} variant="danger">
-              Delete
-            </Buttons>
+            {!confirmingDelete ? (
+              <Buttons onClick={() => setConfirmingDelete(true)} variant="danger">
+                Delete
+              </Buttons>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Buttons
+                  onClick={() => {
+                    onDelete(habit._id);
+                    setConfirmingDelete(false);
+                  }}
+                  variant="danger"
+                  className="bg-red-600 text-white hover:bg-red-700 border-red-600"
+                >
+                  Confirm
+                </Buttons>
+
+                <Buttons
+                  onClick={() => setConfirmingDelete(false)}
+                  variant="neutral"
+                >
+                  Cancel
+                </Buttons>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -50,7 +76,7 @@ export default function HabitCard({ habit, onToggle, onDelete, isAuthenticated }
           return (
             <div key={index} className="flex flex-col items-center">
               <span className="text-xs text-gray-500 mb-1">
-                {days[new Date(date + "T00:00:00").getDay()]}
+                {days[parseLocalDateString(date).getDay()]}
               </span>
               <input
                 type="checkbox"

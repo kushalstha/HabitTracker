@@ -29,6 +29,14 @@ export default function App() {
 
   // Load habits from MongoDB
   const loadHabits = async () => {
+    if (!isAuthenticated) {
+      setHabits([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
     try {
       const response = await getHabits();
 
@@ -49,7 +57,7 @@ export default function App() {
 
   useEffect(() => {
     loadHabits();
-  }, []);
+  }, [isAuthenticated]);
 
   // Tick / Untick
   const toggleToday = async (id) => {
@@ -57,17 +65,39 @@ export default function App() {
 
     if (!habit) return;
 
-    const today = new Date().toISOString().split("T")[0];
+    const { toLocalDateString } = await import("./utils/date");
+    const today = toLocalDateString(new Date());
 
     const updatedCompletions = habit.completions.includes(today)
       ? habit.completions.filter((date) => date !== today)
       : [...habit.completions, today];
 
+    // If habit is daily and user completed all last 7 days, upgrade to weekly
+    let newFrequency = habit.frequency;
+    let finalCompletions = updatedCompletions;
+
+    if (habit.frequency === "daily") {
+      // build last 7 dates (including today) using local dates
+      const last7 = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        return toLocalDateString(d);
+      });
+
+      const allDone = last7.every((date) => updatedCompletions.includes(date));
+
+      if (allDone) {
+        newFrequency = "weekly";
+        // record a single weekly completion (use today's date as the week's completion)
+        finalCompletions = [today];
+      }
+    }
+
     try {
       await updateHabitAPI(id, {
         name: habit.name,
-        frequency: habit.frequency,
-        completions: updatedCompletions,
+        frequency: newFrequency,
+        completions: finalCompletions,
       });
 
       await loadHabits();
@@ -106,6 +136,8 @@ export default function App() {
 
   const handleAuthSuccess = (name) => {
     setIsAuthenticated(true);
+    setHabits([]);
+    setErrors([]);
     if (name) setUserName(name);
   };
 
@@ -114,6 +146,8 @@ export default function App() {
     localStorage.removeItem("userName");
     setIsAuthenticated(false);
     setUserName("");
+    setHabits([]);
+    setErrors([]);
     navigate("/");
   };
 

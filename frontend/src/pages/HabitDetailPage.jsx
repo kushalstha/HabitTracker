@@ -1,6 +1,7 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useOutletContext } from "react-router-dom";
 import Buttons from "../components/Buttons";
+import { toLocalDateString } from "../utils/date";
 
 export default function HabitDetailPage() {
   const { id } = useParams();
@@ -23,7 +24,7 @@ export default function HabitDetailPage() {
     );
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = toLocalDateString(new Date());
   const isCompleted = (habit.completions || []).includes(today);
 
   const sortedCompletions = [...(habit.completions || [])]
