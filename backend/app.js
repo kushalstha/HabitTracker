@@ -34,6 +34,10 @@ app.use(express.json());
 
 dbConnection();
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 app.use(habitRouter);
 
 const PORT = process.env.PORT || 3001;
