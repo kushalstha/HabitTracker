@@ -61,5 +61,5 @@ Make sure you have your environment variables configured for the backend, includ
 ![AI Assistant ](images/AI.png)
 ## Live demo
 
-Add your deployed live URL here.
+![Demo](https://habit-tracker958.netlify.app/)
 
