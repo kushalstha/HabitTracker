@@ -54,8 +54,10 @@ Make sure you have your environment variables configured for the backend, includ
 
 ![Home page](images/homepage.png)
 
+### Streaks page
 ![Streaks](images/streaks.png)
 
+### AI Assistant page
 ![AI Assistant ](images/AI.png)
 ## Live demo
 
