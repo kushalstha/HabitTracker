@@ -61,5 +61,5 @@ Make sure you have your environment variables configured for the backend, includ
 ![AI Assistant ](images/AI.png)
 ## Live demo
 
-![Demo](https://kushalstha-habit-tracker.netlify.app/)
+(https://kushalstha-habit-tracker.netlify.app/)
 
