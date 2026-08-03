@@ -3,29 +3,34 @@ import HabitCard from "./HabitCard";
 export default function HabitList({ habits, onToggle, onDelete, isAuthenticated }) {
   return (
     <div
-      className="mx-auto"
+      className="mx-auto max-w-6xl"
       style={{
-        display: "grid",
-        gridAutoFlow: "column",
-        gridTemplateRows: "repeat(4, auto)",
-        gap: "1rem",
-        alignItems: "start",
-        justifyContent: "flex-start",
-        maxWidth: "1000px",
-        padding: "0 1rem",
-        marginLeft: "2rem",
+        maxHeight: "70vh",
+        overflowY: "auto",
+        padding: "0.5rem 0.5rem 1rem",
+        scrollbarWidth: "thin",
+        scrollbarColor: "#D6D3D1 #F5F5F4",
       }}
     >
-      {habits.map((habit) => (
-        <div key={habit._id} style={{ width: "320px" }}>
-          <HabitCard
-            habit={habit}
-            onToggle={onToggle}
-            onDelete={onDelete}
-            isAuthenticated={isAuthenticated}
-          />
-        </div>
-      ))}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gap: "1rem",
+          alignItems: "start",
+        }}
+      >
+        {habits.map((habit) => (
+          <div key={habit._id}>
+            <HabitCard
+              habit={habit}
+              onToggle={onToggle}
+              onDelete={onDelete}
+              isAuthenticated={isAuthenticated}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

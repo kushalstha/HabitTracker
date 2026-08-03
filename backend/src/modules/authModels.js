@@ -46,6 +46,20 @@ export async function register(userDetails) {
       completions: ["2026-06-27", "2026-06-28", "2026-06-29"],
       user: user._id,
     },
+    {
+      name: "Read for 20 minutes",
+      frequency: "daily",
+      completions: [
+        "2026-06-23",
+        "2026-06-24",
+        "2026-06-25",
+        "2026-06-26",
+        "2026-06-27",
+        "2026-06-28",
+        "2026-06-29",
+      ],
+      user: user._id,
+    },
   ];
 
   await Habit.insertMany(defaultHabits);

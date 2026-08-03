@@ -4,8 +4,9 @@ export default function Buttons({
   type = "button",
   variant = "primary",
   className = "",
+  disabled = false,
 }) {
-  const base = "px-4 py-2 rounded-full font-medium transition-all duration-150";
+  const base = "px-5 py-3 rounded-full font-medium transition-all duration-200 inline-flex items-center justify-center";
 
   const variants = {
     primary: "bg-black text-white hover:bg-gray-900",
@@ -19,7 +20,10 @@ export default function Buttons({
     <button
       type={type}
       onClick={onClick}
-      className={`${base} ${variants[variant]} ${className}`}
+      disabled={disabled}
+      className={`${base} ${variants[variant]} ${
+        disabled ? "opacity-60 cursor-not-allowed" : ""
+      } ${className}`}
     >
       {children}
     </button>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Outlet, useNavigate } from "react-router-dom";
 import { computeStreak } from "./utils/computeStreak";
+import { toLocalDateString } from "./utils/date";
 import HomePage from "./pages/HomePage";
 import HabitDetailPage from "./pages/HabitDetailPage";
 import AuthPage from "./pages/AuthPage";
@@ -26,6 +27,16 @@ export default function App() {
   );
 
   const navigate = useNavigate();
+
+  const shouldBecomeWeekly = (completions = []) => {
+    const last7 = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      return toLocalDateString(d);
+    });
+
+    return last7.every((date) => completions.includes(date));
+  };
 
   // Load habits from MongoDB
   const loadHabits = async () => {
@@ -65,32 +76,22 @@ export default function App() {
 
     if (!habit) return;
 
-    const { toLocalDateString } = await import("./utils/date");
     const today = toLocalDateString(new Date());
 
-    const updatedCompletions = habit.completions.includes(today)
-      ? habit.completions.filter((date) => date !== today)
-      : [...habit.completions, today];
+    const currentCompletions = Array.isArray(habit.completions)
+      ? habit.completions.filter(Boolean)
+      : [];
 
-    // If habit is daily and user completed all last 7 days, upgrade to weekly
+    const updatedCompletions = currentCompletions.includes(today)
+      ? currentCompletions.filter((date) => date !== today)
+      : [...currentCompletions, today];
+
     let newFrequency = habit.frequency;
     let finalCompletions = updatedCompletions;
 
-    if (habit.frequency === "daily") {
-      // build last 7 dates (including today) using local dates
-      const last7 = Array.from({ length: 7 }, (_, i) => {
-        const d = new Date();
-        d.setDate(d.getDate() - (6 - i));
-        return toLocalDateString(d);
-      });
-
-      const allDone = last7.every((date) => updatedCompletions.includes(date));
-
-      if (allDone) {
-        newFrequency = "weekly";
-        // record a single weekly completion (use today's date as the week's completion)
-        finalCompletions = [today];
-      }
+    if (habit.frequency === "daily" && shouldBecomeWeekly(updatedCompletions)) {
+      newFrequency = "weekly";
+      finalCompletions = [...new Set([today, ...updatedCompletions])];
     }
 
     try {
@@ -107,13 +108,30 @@ export default function App() {
   };
 
   // Add Habit
-  const handleAddHabit = async (name, frequency) => {
+  const handleAddHabit = async (name, frequency, selectedDays = []) => {
     try {
-      await addHabitAPI({
+      const today = toLocalDateString(new Date());
+      const completions = Array.isArray(selectedDays) ? selectedDays : [];
+      const finalFrequency =
+        frequency === "daily" && shouldBecomeWeekly(completions)
+          ? "weekly"
+          : frequency;
+
+      const normalizedCompletions = Array.from(
+        new Set(
+          finalFrequency === "weekly"
+            ? [...completions, today]
+            : completions
+        )
+      );
+
+      const payload = {
         name,
-        frequency,
-        completions: [],
-      });
+        frequency: finalFrequency,
+        completions: normalizedCompletions,
+      };
+
+      await addHabitAPI(payload);
 
       setShowForm(false);
 

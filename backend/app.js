@@ -6,6 +6,7 @@ import dbConnection from "./src/config/db.js";
 import habitRouter from "./src/routes/habitroute.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import habitRoutes from "./src/routes/habitroute.js";
+import coachRoutes from "./src/routes/coachRoutes.js";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
@@ -44,6 +45,7 @@ const PORT = process.env.PORT || 3001;
 
 app.use('/auth',authRoutes);
 app.use('/habits',habitRoutes);
+app.use('/api/ai',coachRoutes);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);

@@ -2,8 +2,7 @@ import { createPortal } from "react-dom";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import HabitList from "../components/HabitList";
 import AddHabitForm from "../components/AddHabitForm";
-
-import Buttons from "../components/Buttons";
+import AiCoachCard from "../components/AiCoachCard";
 
 export default function HomePage() {
   const {
@@ -142,6 +141,10 @@ export default function HomePage() {
             onDelete={deleteHabit}
             isAuthenticated={isAuthenticated}
           />
+
+          <div className="mt-12">
+            <AiCoachCard />
+          </div>
         </>
       ) : null}
 

@@ -1,21 +1,27 @@
 // Computes the current streak of completed habits based on the provided completions array.
-import { toLocalDateString } from "./date";
+import { parseLocalDateString, toLocalDateString } from "./date";
 
 export function computeStreak(completions) {
-  if (!completions || completions.length === 0) return 0;
+  const normalizedCompletions = [...new Set((completions || []).filter(Boolean))].sort();
+
+  if (normalizedCompletions.length === 0) return 0;
 
   let streak = 0;
-  let check = new Date();
+  const latestCompletion = parseLocalDateString(
+    normalizedCompletions[normalizedCompletions.length - 1]
+  );
+  let check = new Date(latestCompletion);
+  check.setHours(0, 0, 0, 0);
 
   while (true) {
     const dateStr = toLocalDateString(check);
 
-    if (completions.includes(dateStr)) {
-      streak++;
-      check.setDate(check.getDate() - 1);
-    } else {
+    if (!normalizedCompletions.includes(dateStr)) {
       break;
     }
+
+    streak += 1;
+    check.setDate(check.getDate() - 1);
   }
 
   return streak;
